@@ -1,0 +1,51 @@
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AuthController } from './auth/auth.controller';
+import { AuthGuard } from './auth/auth.guard';
+import { AuthService } from './auth/auth.service';
+import { User } from './users/entities/user.entity';
+import { UsersController } from './users/users.controller';
+import { UsersService } from './users/users.service';
+import { EmailService } from './services/email/email.service';
+import { CommonService } from './services/common/common.service';
+
+@Module({
+  imports: [ConfigModule.forRoot({
+    isGlobal: true,
+    cache: true,
+  }),
+  TypeOrmModule.forRootAsync({
+    imports: [ConfigModule],
+    inject: [ConfigService],
+    useFactory: (configService: ConfigService) => ({
+      type: 'mongodb',
+      url: configService.get('MONGODB_URI'),
+      entities: [],
+      synchronize: true,
+      logging: true,
+      autoLoadEntities: true,
+    }),
+  }),
+  TypeOrmModule.forFeature([User]),
+  JwtModule.registerAsync({
+    imports: [ConfigModule],
+    inject: [ConfigService],
+    useFactory: (configService: ConfigService) => ({
+      global: true,
+      secret: configService.getOrThrow<string>('JWT_SECRET'),
+      signOptions: { expiresIn: '10d' },
+    }),
+  }),
+  ],
+  controllers: [AppController, AuthController, UsersController],
+  providers: [{
+    provide: APP_GUARD,
+    useClass: AuthGuard,
+  }, AppService, EmailService, CommonService, AuthService, UsersService],
+})
+export class AppModule { }
