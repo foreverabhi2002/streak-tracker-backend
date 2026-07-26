@@ -9,16 +9,16 @@ import { JwtService } from '@nestjs/jwt';
 import { ObjectId } from 'mongodb';
 import { CommonService } from 'src/services/common/common.service';
 import { EmailService } from 'src/services/email/email.service';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
 import {
   ChangePasswordDto,
   ForgotPasswordDto,
   LogInDto,
   ResetPasswordDto,
-  VerifyOtpDto,
   VerifyEmailDto,
+  VerifyOtpDto,
 } from './auth.dto';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -28,17 +28,26 @@ export class AuthService {
     private readonly commonService: CommonService,
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
-  ) { }
+  ) {}
 
   async register(createUserDto: CreateUserDto) {
     const password = createUserDto.password;
     const hashedPassword = await this.commonService.hashPassword(password);
-    const user = await this.usersService.create({ ...createUserDto, password: hashedPassword });
+    const user = await this.usersService.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
     const token = await this.jwtService.signAsync(
       { userId: user._id, action: 'VERIFY_EMAIL' },
-      { secret: this.configService.getOrThrow<string>('JWT_SECRET'), expiresIn: '15m' },
+      {
+        secret: this.configService.getOrThrow<string>('JWT_SECRET'),
+        expiresIn: '15m',
+      },
     );
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
+    const frontendUrl = this.configService.get<string>(
+      'FRONTEND_URL',
+      'http://localhost:3000',
+    );
     const verificationLink = `${frontendUrl}/verify-email?token=${token}`;
 
     void this.emailService.sendEmail(
@@ -50,7 +59,7 @@ export class AuthService {
       <p><a href="${verificationLink}">${verificationLink}</a></p>
       <p>This link will expire in 15 minutes.</p>
       <p>Thank you</p>
-      `
+      `,
     );
     return user;
   }
@@ -61,8 +70,11 @@ export class AuthService {
       decoded = await this.jwtService.verifyAsync(payload.token, {
         secret: this.configService.getOrThrow<string>('JWT_SECRET'),
       });
-    } catch (err) {
-      throw new HttpException('Invalid or expired token', HttpStatus.UNAUTHORIZED);
+    } catch {
+      throw new HttpException(
+        'Invalid or expired token',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     if (decoded.action !== 'VERIFY_EMAIL') {
@@ -81,14 +93,10 @@ export class AuthService {
     return { message: 'Email successfully verified' };
   }
 
-
   async login(payload: LogInDto) {
     const user = await this.usersService.findByEmail(payload.email);
     if (!user) {
-      throw new HttpException(
-        'User does not exist',
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new HttpException('User does not exist', HttpStatus.UNAUTHORIZED);
     }
     if (!user.isActive) {
       throw new HttpException(
@@ -99,9 +107,15 @@ export class AuthService {
     if (!user.isVerified) {
       const token = await this.jwtService.signAsync(
         { userId: user._id, action: 'VERIFY_EMAIL' },
-        { secret: this.configService.getOrThrow<string>('JWT_SECRET'), expiresIn: '15m' },
+        {
+          secret: this.configService.getOrThrow<string>('JWT_SECRET'),
+          expiresIn: '15m',
+        },
       );
-      const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
+      const frontendUrl = this.configService.get<string>(
+        'FRONTEND_URL',
+        'http://localhost:3000',
+      );
       const verificationLink = `${frontendUrl}/verify-email?token=${token}`;
 
       void this.emailService.sendEmail(
@@ -113,7 +127,7 @@ export class AuthService {
       <p><a href="${verificationLink}">${verificationLink}</a></p>
       <p>This link will expire in 15 minutes.</p>
       <p>Thank you</p>
-      `
+      `,
       );
       throw new HttpException(
         'User is not verified. Kindly contact administrator.',
@@ -138,7 +152,6 @@ export class AuthService {
         username: user.username,
         email: user.email,
         password: user.password,
-
       },
       {
         secret: this.configService.getOrThrow<string>('JWT_SECRET'),
@@ -151,10 +164,7 @@ export class AuthService {
   async forgotPassword(payload: ForgotPasswordDto) {
     const user = await this.usersService.findByEmail(payload.email);
     if (!user) {
-      throw new HttpException(
-        'User does not exist',
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new HttpException('User does not exist', HttpStatus.UNAUTHORIZED);
     }
     const otp = this.commonService.generateOtp();
     const token = this.jwtService.sign(
@@ -169,7 +179,7 @@ export class AuthService {
       <p>Your OTP is ${otp}</p>
       <p>This OTP will expire in 5 minutes</p>
       <p>Thank you</p>
-      `
+      `,
     );
     return token;
   }
@@ -252,14 +262,9 @@ export class AuthService {
     await this.usersService.updatePassword(changePasswordDto.user._id, {
       password,
     });
-    const user = await this.usersService.findOne(
-      changePasswordDto.user._id,
-    );
+    const user = await this.usersService.findOne(changePasswordDto.user._id);
     if (!user) {
-      throw new HttpException(
-        'User does not exist',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User does not exist', HttpStatus.BAD_REQUEST);
     }
     const accessToken = await this.jwtService.signAsync(
       {

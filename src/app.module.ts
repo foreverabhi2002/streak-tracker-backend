@@ -11,6 +11,9 @@ import { AuthService } from './auth/auth.service';
 import { Goal } from './goals/entities/goal.entity';
 import { GoalsController } from './goals/goals.controller';
 import { GoalsService } from './goals/goals.service';
+import { LogEntry } from './log-entries/entities/log-entry.entity';
+import { LogEntriesController } from './log-entries/log-entries.controller';
+import { LogEntriesService } from './log-entries/log-entries.service';
 import { CommonService } from './services/common/common.service';
 import { EmailService } from './services/email/email.service';
 import { User } from './users/entities/user.entity';
@@ -35,7 +38,7 @@ import { UsersService } from './users/users.service';
         autoLoadEntities: true,
       }),
     }),
-    TypeOrmModule.forFeature([User, Goal]),
+    TypeOrmModule.forFeature([User, Goal, LogEntry]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -51,6 +54,7 @@ import { UsersService } from './users/users.service';
     AuthController,
     UsersController,
     GoalsController,
+    LogEntriesController,
   ],
   providers: [
     {
@@ -63,6 +67,7 @@ import { UsersService } from './users/users.service';
     AuthService,
     UsersService,
     GoalsService,
+    LogEntriesService,
   ],
 })
 export class AppModule {}

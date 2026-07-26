@@ -4,28 +4,24 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Post
+  Post,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ObjectId } from 'mongodb';
 import { Public } from 'src/decorators/public.decorator';
 import { User } from 'src/decorators/user.decorator';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
 import {
   ChangePasswordDto,
   ForgotPasswordDto,
   LogInDto,
   ResetPasswordDto,
-  VerifyOtpDto,
   VerifyEmailDto,
+  VerifyOtpDto,
 } from './auth.dto';
 import type { JwtPayload } from './auth.interface';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Controller('auth')
 @ApiTags('Auth Routes')
@@ -33,7 +29,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
-  ) { }
+  ) {}
 
   @Post('register')
   @Public()
@@ -43,7 +39,8 @@ export class AuthController {
     const data = await this.authService.register(registerDto);
     return {
       data,
-      message: 'User signed up successfully. Please check your email to verify your account.',
+      message:
+        'User signed up successfully. Please check your email to verify your account.',
     };
   }
 
@@ -60,9 +57,7 @@ export class AuthController {
   @Public()
   @ApiOperation({ summary: 'Login User' })
   @HttpCode(HttpStatus.ACCEPTED)
-  async login(
-    @Body() logInDto: LogInDto,
-  ) {
+  async login(@Body() logInDto: LogInDto) {
     const data = await this.authService.login(logInDto);
     return {
       data,
@@ -74,9 +69,7 @@ export class AuthController {
   @Public()
   @ApiOperation({ summary: 'Forgot Password' })
   @HttpCode(HttpStatus.OK)
-  async forgotPassword(
-    @Body() forgotPasswordDto: ForgotPasswordDto,
-  ) {
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     const token = await this.authService.forgotPassword(forgotPasswordDto);
     return {
       message: 'email sent successfully',
@@ -84,14 +77,11 @@ export class AuthController {
     };
   }
 
-
   @Post('verify-otp')
   @Public()
   @ApiOperation({ summary: 'Verify Otp' })
   @HttpCode(HttpStatus.OK)
-  async verifyOtp(
-    @Body() verifyOtpDto: VerifyOtpDto,
-  ) {
+  async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
     const data = await this.authService.verifyOtp(verifyOtpDto);
     return {
       data,
@@ -103,9 +93,7 @@ export class AuthController {
   @Public()
   @ApiOperation({ summary: 'Reset Password' })
   @HttpCode(HttpStatus.OK)
-  async resetPassword(
-    @Body() resetPasswordDto: ResetPasswordDto,
-  ) {
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     const data = await this.authService.resetPassword(resetPasswordDto);
     return {
       data,
@@ -117,9 +105,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Change Password' })
   @ApiBearerAuth()
   @HttpCode(HttpStatus.ACCEPTED)
-  async changePassword(
-    @Body() changePasswordDto: ChangePasswordDto,
-  ) {
+  async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
     const data = await this.authService.changePassword(changePasswordDto);
     return {
       message: 'Password changed successfully',
@@ -131,12 +117,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Who Am I' })
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  async whoAmI(
-    @User() user: JwtPayload,
-  ) {
-    const userData = await this.usersService.findOne(
-      new ObjectId(user._id),
-    );
+  async whoAmI(@User() user: JwtPayload) {
+    const userData = await this.usersService.findOne(new ObjectId(user._id));
     return {
       data: {
         ...userData,

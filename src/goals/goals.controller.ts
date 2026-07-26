@@ -18,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { ObjectId } from 'mongodb';
 import type { JwtPayload } from 'src/auth/auth.interface';
+import { Public } from 'src/decorators/public.decorator';
 import { User } from 'src/decorators/user.decorator';
 import { CreateGoalDto } from './dto/create-goal.dto';
 import { UpdateGoalDto } from './dto/update-goal.dto';
@@ -41,8 +42,8 @@ export class GoalsController {
   }
 
   @Get()
+  @Public()
   @ApiOperation({ summary: 'Get All Goals' })
-  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   async findAll() {
     const data = await this.goalsService.findAll();
@@ -53,13 +54,13 @@ export class GoalsController {
   }
 
   @Get(':id')
+  @Public()
   @ApiOperation({ summary: 'Get a Goal' })
   @ApiParam({
     name: 'id',
     type: 'string',
     required: true,
   })
-  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   async findOne(@Param('id') id: ObjectId) {
     const data = await this.goalsService.findOne(id);
