@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 
 @Injectable()
 export class CommonService {
-  constructor() { }
+  constructor() {}
 
   public generatePassword = () => {
     return crypto.randomBytes(8).toString('hex');
@@ -52,5 +52,4 @@ export class CommonService {
       expiresIn: expiresIn,
     };
   };
-
 }

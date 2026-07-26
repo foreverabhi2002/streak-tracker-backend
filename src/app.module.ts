@@ -8,44 +8,61 @@ import { AppService } from './app.service';
 import { AuthController } from './auth/auth.controller';
 import { AuthGuard } from './auth/auth.guard';
 import { AuthService } from './auth/auth.service';
+import { Goal } from './goals/entities/goal.entity';
+import { GoalsController } from './goals/goals.controller';
+import { GoalsService } from './goals/goals.service';
+import { CommonService } from './services/common/common.service';
+import { EmailService } from './services/email/email.service';
 import { User } from './users/entities/user.entity';
 import { UsersController } from './users/users.controller';
 import { UsersService } from './users/users.service';
-import { EmailService } from './services/email/email.service';
-import { CommonService } from './services/common/common.service';
 
 @Module({
-  imports: [ConfigModule.forRoot({
-    isGlobal: true,
-    cache: true,
-  }),
-  TypeOrmModule.forRootAsync({
-    imports: [ConfigModule],
-    inject: [ConfigService],
-    useFactory: (configService: ConfigService) => ({
-      type: 'mongodb',
-      url: configService.get('MONGODB_URI'),
-      entities: [],
-      synchronize: true,
-      logging: true,
-      autoLoadEntities: true,
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      cache: true,
     }),
-  }),
-  TypeOrmModule.forFeature([User]),
-  JwtModule.registerAsync({
-    imports: [ConfigModule],
-    inject: [ConfigService],
-    useFactory: (configService: ConfigService) => ({
-      global: true,
-      secret: configService.getOrThrow<string>('JWT_SECRET'),
-      signOptions: { expiresIn: '10d' },
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'mongodb',
+        url: configService.get('MONGODB_URI'),
+        entities: [],
+        synchronize: true,
+        logging: true,
+        autoLoadEntities: true,
+      }),
     }),
-  }),
+    TypeOrmModule.forFeature([User, Goal]),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        global: true,
+        secret: configService.getOrThrow<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '10d' },
+      }),
+    }),
   ],
-  controllers: [AppController, AuthController, UsersController],
-  providers: [{
-    provide: APP_GUARD,
-    useClass: AuthGuard,
-  }, AppService, EmailService, CommonService, AuthService, UsersService],
+  controllers: [
+    AppController,
+    AuthController,
+    UsersController,
+    GoalsController,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+    AppService,
+    EmailService,
+    CommonService,
+    AuthService,
+    UsersService,
+    GoalsService,
+  ],
 })
-export class AppModule { }
+export class AppModule {}
