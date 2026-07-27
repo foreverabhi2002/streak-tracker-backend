@@ -42,14 +42,32 @@ export class GoalsController {
   }
 
   @Get()
-  @Public()
-  @ApiOperation({ summary: 'Get All Goals' })
+  @ApiOperation({ summary: 'Get All Goals for Authenticated User' })
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  async findAll() {
-    const data = await this.goalsService.findAll();
+  async findAll(@User() user: JwtPayload) {
+    const data = await this.goalsService.findAll(user._id);
     return {
       data,
       message: 'All Goals retrieved',
+    };
+  }
+
+  @Get('public/:username/:slug')
+  @Public()
+  @ApiOperation({ summary: 'Get a public goal by username and slug' })
+  @ApiParam({ name: 'username', type: 'string', required: true })
+  @ApiParam({ name: 'slug', type: 'string', required: true })
+  @HttpCode(HttpStatus.OK)
+  async findPublicGoal(
+    @Param('username') username: string,
+    @Param('slug') slug: string,
+  ) {
+    const data = await this.goalsService.findByUsernameAndSlug(username, slug);
+    if (!data) throw new BadRequestException('Goal not found');
+    return {
+      data,
+      message: 'Public Goal retrieved',
     };
   }
 

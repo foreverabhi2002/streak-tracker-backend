@@ -1,5 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { CreateGoalDto } from './create-goal.dto';
 
 export class UpdateGoalDto extends PartialType(CreateGoalDto) {
@@ -14,7 +14,7 @@ export class UpdateGoalDto extends PartialType(CreateGoalDto) {
   endDate?: string;
 
   @IsBoolean()
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
-  isCompleted!: boolean;
+  isCompleted?: boolean;
 }

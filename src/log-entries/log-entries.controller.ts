@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -46,8 +47,8 @@ export class LogEntriesController {
   @Public()
   @ApiOperation({ summary: 'Get All Log Entries' })
   @HttpCode(HttpStatus.OK)
-  async findAll() {
-    const data = await this.logsService.findAll();
+  async findAll(@Query('goalId') goalId?: string) {
+    const data = await this.logsService.findAll(goalId);
     return {
       data,
       message: 'Logs entries retrieved',

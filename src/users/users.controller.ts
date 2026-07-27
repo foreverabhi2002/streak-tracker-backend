@@ -17,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { ObjectId } from 'mongodb';
 import type { JwtPayload } from 'src/auth/auth.interface';
+import { Public } from 'src/decorators/public.decorator';
 import { User } from 'src/decorators/user.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
@@ -52,6 +53,24 @@ export class UsersController {
     return {
       data,
       message: 'User fetched successfully',
+    };
+  }
+
+  @Get('public/:username')
+  @Public()
+  @ApiOperation({ summary: 'Get Public User Profile' })
+  @ApiParam({ name: 'username', type: 'string', required: true })
+  @HttpCode(HttpStatus.OK)
+  async findPublicProfile(@Param('username') username: string) {
+    const user = await this.usersService.findByUsername(username);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    // Omit sensitive data
+    const { password, email, ...publicData } = user;
+    return {
+      data: publicData,
+      message: 'Public profile fetched successfully',
     };
   }
 

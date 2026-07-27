@@ -36,8 +36,8 @@ export class Goal {
   @Column({ default: 0 })
   longestStreak!: number;
 
-  @Column({ default: false })
-  isCompleted!: boolean;
+  @Column({ default: false, nullable: true })
+  isCompleted?: boolean;
 
   @CreateDateColumn()
   createdAt!: Date;

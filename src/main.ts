@@ -18,7 +18,8 @@ async function bootstrap() {
     { logger: ['log', 'error', 'warn', 'debug', 'verbose'], rawBody: true },
   );
   app.enableCors({
-    origin: '*',
+    origin:
+      process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : '*',
     methods: ['POST', 'GET', 'PUT', 'PATCH', 'DELETE'],
   });
   await server.register(rateLimit, {
