@@ -130,7 +130,7 @@ export class AuthService {
       `,
       );
       throw new HttpException(
-        'User is not verified. Kindly contact administrator.',
+        'User is not verified. Please check your email to verify your account.',
         HttpStatus.UNAUTHORIZED,
       );
     }
