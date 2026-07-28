@@ -53,6 +53,19 @@ export class GoalsController {
     };
   }
 
+  @Get('public/:username')
+  @Public()
+  @ApiOperation({ summary: 'Get all public goals by username' })
+  @ApiParam({ name: 'username', type: 'string', required: true })
+  @HttpCode(HttpStatus.OK)
+  async findPublicGoals(@Param('username') username: string) {
+    const data = await this.goalsService.findByUsername(username);
+    return {
+      data,
+      message: 'Public Goals retrieved',
+    };
+  }
+
   @Get('public/:username/:slug')
   @Public()
   @ApiOperation({ summary: 'Get a public goal by username and slug' })

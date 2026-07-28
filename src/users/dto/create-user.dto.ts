@@ -5,6 +5,11 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
+  name!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
   username!: string;
 
   @IsString()

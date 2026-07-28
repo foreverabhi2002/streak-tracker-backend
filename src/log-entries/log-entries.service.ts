@@ -78,6 +78,16 @@ export class LogEntriesService {
     return await this.logRepository.find();
   }
 
+  async findAllByUsername(username: string) {
+    const goals = await this.goalsService.findByUsername(username);
+    const goalIds = goals.map((goal) => goal._id);
+    if (goalIds.length === 0) return [];
+    return await this.logRepository.find({
+      where: { goalId: { $in: goalIds } },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async findOne(_id: ObjectId) {
     return await this.logRepository.findOneBy({ _id: new ObjectId(_id) });
   }

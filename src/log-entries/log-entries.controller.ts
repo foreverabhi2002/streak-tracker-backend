@@ -55,6 +55,19 @@ export class LogEntriesController {
     };
   }
 
+  @Get('public/:username')
+  @Public()
+  @ApiOperation({ summary: 'Get All Public Log Entries by Username' })
+  @ApiParam({ name: 'username', type: 'string', required: true })
+  @HttpCode(HttpStatus.OK)
+  async findAllByUsername(@Param('username') username: string) {
+    const data = await this.logsService.findAllByUsername(username);
+    return {
+      data,
+      message: 'Public Logs entries retrieved',
+    };
+  }
+
   @Get(':id')
   @Public()
   @ApiOperation({ summary: 'Get Log Entry' })
